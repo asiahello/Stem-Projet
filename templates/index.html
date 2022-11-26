@@ -12,8 +12,8 @@
     <!-- Żeby pobrać ikony Font Awesome, trzeba się zalogować, nazwa pliku jest nazwą użytkownika -->
     <script src="https://kit.fontawesome.com/ad76fafc56.js" crossorigin="anonymous"></script>
 
-    <link rel="stylesheet" href="styles/normalize.css"/>
-    <link rel="stylesheet" href="styles/styles.css"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/normalize.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}"/>
   </head>
   <body>
     <section id="hero" class="hero-section">
@@ -49,8 +49,8 @@
     <section id="about" class="section about-section">
       <div class="container">
         <div class="columns-container columns-2-container">
-          <div class="column about-image">
-            <img src="images/cyber_sec.jpg" alt="Młoda astronautka">
+          <div class="column about-image">            
+           <img src="{{url_for('static', filename='images/cyber_sec.jpg')}}" alt="Mem">
           </div>
           <div class="column about-text">
             <h2 class="section-title">O mnie</h2>
@@ -185,7 +185,6 @@
         </div>
       </div>
     </footer>
-    
-    <script src="script.js"></script>
+    <script src="{{url_for('static', filename='scripts/script.js')}}"></script>
   </body>
 </html>
