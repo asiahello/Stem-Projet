@@ -1,3 +1,5 @@
+import requests
+
 from datetime import datetime
 from flask import (
     Flask, 
@@ -29,11 +31,19 @@ class Project(db.Model):
 @app.route("/")
 def home():
     projects = Project.query.all()
+    weather_data = get_weather_data()
 
     return render_template(
         "index.html",
         projects_list=projects,
+        weather_data=weather_data,
     )
+
+def get_weather_data():
+    url = 'https://danepubliczne.imgw.pl/api/data/synop/station/warszawa'
+    response = requests.get(url)
+    return response.json()
+
 
 # żądanie wyświetl mi stronę główną - request HTTP GET /
 # żądanie wyświetl mi szczegóły zadania - request HTTP GET /task/{id}
