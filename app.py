@@ -59,4 +59,12 @@ def add_project():
     return redirect(url_for('home'))
     
 
+@app.route("/projects/<int:id>/delete")
+def delete_project(id):
+    project_to_delete = Project.query.get_or_404(id)
+    
+    db.session.delete(project_to_delete)
+    db.session.commit()
+    db.session.close()
+    return redirect(url_for('home'))
 
