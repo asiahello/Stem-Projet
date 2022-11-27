@@ -3,6 +3,21 @@
 
         <h1> Moje projekty </h1>
 
+        <!-- request HTTP POST /projects-->
+        <form class="form-inline" action="/projects" method="POST">
+            <div>
+                <input type="text" name="title" placeholder="Tytuł">
+                <input type="text" name="category" placeholder="Kategoria">
+                <input type="text" name="link" placeholder="Link">
+                <button type="submit" class="add-button">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+        </form>
+
+
+
+
         {% if not projects_list %}
         <h3> Nie mam jeszcze żadnych projektów </h3>
         {% else %}

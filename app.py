@@ -1,5 +1,11 @@
 from datetime import datetime
-from flask import Flask, render_template
+from flask import (
+    Flask, 
+    redirect,
+    render_template, 
+    request,
+    url_for,
+)
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -28,3 +34,29 @@ def home():
         "index.html",
         projects_list=projects,
     )
+
+# żądanie wyświetl mi stronę główną - request HTTP GET /
+# żądanie wyświetl mi szczegóły zadania - request HTTP GET /task/{id}
+# żądanie wyświetl mi stronę z wszystkimi zadaniami - request HTTP GET /tasks
+# żądanie utwórz nowe zadanie - request HTTP POST /task + dane
+
+@app.route("/projects", methods=["POST"])
+def add_project():
+    title = request.form.get("title")
+    category = request.form.get("category")
+    link = request.form.get("link")
+
+    new_project = Project(
+        title=title,
+        category=category,
+        link=link,
+    )
+
+    db.session.add(new_project)
+    db.session.commit()
+    db.session.close()
+    
+    return redirect(url_for('home'))
+    
+
+
