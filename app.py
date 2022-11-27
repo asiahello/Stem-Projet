@@ -8,12 +8,28 @@ from flask import (
     request,
     url_for,
 )
+
+from flask_login import (
+    UserMixin,
+    login_user,
+    LoginManager,
+    login_required,
+)
 from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+app.config['SECRET_KEY'] = 'very secret key'
 db = SQLAlchemy(app)
+
+
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+ 
+@login_manager.user_loader
+def load_user(id):
+   return User.query.get(int(id))
 
 
 class Project(db.Model):
@@ -26,6 +42,12 @@ class Project(db.Model):
 
     def __repr__(self):
         return f'*Project {self.title}*'
+
+
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True)
+    password = db.Column(db.String(100), nullable=False)
 
 
 @app.route("/")
@@ -83,6 +105,7 @@ def get_rain_info(rainfall):
 # żądanie wyświetl mi stronę z wszystkimi zadaniami - request HTTP GET /tasks
 # żądanie utwórz nowe zadanie - request HTTP POST /task + dane
 
+@login_required
 @app.route("/projects", methods=["POST"])
 def add_project():
     title = request.form.get("title")
@@ -119,3 +142,25 @@ def change_status(id):
 
     db.session.commit()
     return redirect(url_for('home'))
+
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+    else:  # POST
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        user = User.query.filter_by(username=username).first()
+        if user:
+            if user.password == password:
+                login_user(user, remember=True)
+                return redirect(url_for('home'))
+        else:
+            return render_template('login.html')
+
+ 
+@app.route('/logout')
+def logout():
+   return '<p>Logout</p>'
