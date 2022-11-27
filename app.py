@@ -17,10 +17,14 @@ class Project(db.Model):
     finished = db.Column(db.Boolean)
 
     def __repr__(self):
-        return f'<Project {self.title}>'
+        return f'*Project {self.title}*'
 
 
 @app.route("/")
 def home():
     projects = Project.query.all()
-    return render_template(template_name_or_list="index.html", p=projects)
+
+    return render_template(
+        "index.html",
+        projects_list=projects,
+    )
