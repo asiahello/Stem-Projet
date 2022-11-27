@@ -68,3 +68,11 @@ def delete_project(id):
     db.session.close()
     return redirect(url_for('home'))
 
+
+@app.route("/projects/<int:id>/change_status")
+def change_status(id):
+    project = Project.query.get_or_404(id)
+    project.finished = not project.finished
+
+    db.session.commit()
+    return redirect(url_for('home'))
