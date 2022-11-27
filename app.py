@@ -21,5 +21,6 @@ class Project(db.Model):
 
 
 @app.route("/")
-def hello_world():
-    return render_template("index.html")
+def home():
+    projects = Project.query.all()
+    return render_template(template_name_or_list="index.html", p=projects)
