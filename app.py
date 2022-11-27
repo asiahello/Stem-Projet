@@ -31,18 +31,51 @@ class Project(db.Model):
 @app.route("/")
 def home():
     projects = Project.query.all()
-    weather_data = get_weather_data()
+    weather_mood = get_weater_mood()
 
     return render_template(
         "index.html",
         projects_list=projects,
-        weather_data=weather_data,
+        weather_mood=weather_mood,
     )
+
+def get_weater_mood():
+    temperature, pressure, rainfall = get_weather_data()
+    rain_info = get_rain_info(rainfall)
+
+    if pressure < 1010 or pressure > 1025:
+        work_mood = 'nie sprzyja'
+        comment = 'czekam na lepsze ciśnienie'
+    else:  # cisnienie jest ok
+        if rainfall < 10:  # nie pada
+            if temperature > 20: # nie pada i jest ciepło
+                work_mood = 'nie sprzyja'
+                comment = 'nie pada więc możliwe że jeste offline'
+            else: # nie pada i jest zimno
+                work_mood = 'sprzyja'
+                comment = 'ale przyja również spacerom'
+        else:  # pada
+            work_mood = 'sprzyja'
+            comment = 'więc prawdopodobnie pracuję nad którymś z projektów'
+
+    return f'Pogoda {work_mood} programowaniu, {comment}. PS. {rain_info}'
 
 def get_weather_data():
     url = 'https://danepubliczne.imgw.pl/api/data/synop/station/warszawa'
     response = requests.get(url)
-    return response.json()
+    weather_data = response.json()
+    temperature = float(weather_data['temperatura'])
+    pressure = float(weather_data['cisnienie'])
+    rainfall = float(weather_data['suma_opadu'])
+    return temperature, pressure, rainfall
+
+def get_rain_info(rainfall):
+    if rainfall < 1:
+        return 'Dziś nie pada :)'
+    elif rainfall < 10:
+        return 'Może lekko popadać'
+    else:
+        return 'Weź parasol!'
 
 
 # żądanie wyświetl mi stronę główną - request HTTP GET /
