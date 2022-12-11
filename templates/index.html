@@ -31,6 +31,9 @@
               <li><a href="#interests">Zainteresowania</a></li>
               <li><a href="#photos">Zdjęcia</a></li>
               <li><a href="#contact">Kontakt</a></li>
+              {% if user.is_authenticated %}
+              <li><a href='/logout'>Wyloguj</a></li>
+              {% endif%}
             </ul>
           </nav>
         </header>

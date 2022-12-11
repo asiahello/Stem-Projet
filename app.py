@@ -10,16 +10,22 @@ from flask import (
 )
 
 from flask_login import (
-    UserMixin,
-    login_user,
+    current_user,
     LoginManager,
+    login_user,
     login_required,
+    logout_user,
+    UserMixin,
 )
 from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+# ten klucz powinien być przechowywany w zmiennych środowiskowych
+# ponieważ jest używany do szyfrowania session cookie
+# przykłady jak to zrobić są w filmikach na youtube dot. flaska
+# np: https://www.youtube.com/watch?v=dam0GPOAvVI
 app.config['SECRET_KEY'] = 'very secret key'
 db = SQLAlchemy(app)
 
@@ -47,6 +53,9 @@ class Project(db.Model):
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)
+    # na potrzeby projektu trzymamy hasło w bazie danych w formie plain-textu
+    # nie powinno się tego robić w finalnych aplikacjach
+    # zobacz: https://www.youtube.com/watch?v=dam0GPOAvVI
     password = db.Column(db.String(100), nullable=False)
 
 
@@ -57,6 +66,7 @@ def home():
 
     return render_template(
         "index.html",
+        user=current_user,
         projects_list=projects,
         weather_mood=weather_mood,
     )
@@ -125,6 +135,7 @@ def add_project():
     return redirect(url_for('home'))
     
 
+@login_required
 @app.route("/projects/<int:id>/delete")
 def delete_project(id):
     project_to_delete = Project.query.get_or_404(id)
@@ -135,6 +146,7 @@ def delete_project(id):
     return redirect(url_for('home'))
 
 
+@login_required
 @app.route("/projects/<int:id>/change_status")
 def change_status(id):
     project = Project.query.get_or_404(id)
@@ -160,7 +172,9 @@ def login():
         else:
             return render_template('login.html')
 
- 
+
+@login_required 
 @app.route('/logout')
 def logout():
-   return '<p>Logout</p>'
+   logout_user()
+   return redirect(url_for('home'))
