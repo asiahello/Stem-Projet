@@ -1,0 +1,40 @@
+<section id="projects" class="section section-violet projects-section">
+    <div class="container">
+
+        <h1> Moje projekty </h1>
+
+        <!-- request HTTP POST /projects-->
+        <form class="form-inline" action="/projects" method="POST">
+            <div>
+                <input type="text" name="title" placeholder="Tytuł">
+                <input type="text" name="category" placeholder="Kategoria">
+                <input type="text" name="link" placeholder="Link">
+                <button type="submit" class="add-button">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+        </form>
+
+
+
+
+        {% if not projects_list %}
+        <h3> Nie mam jeszcze żadnych projektów </h3>
+        {% else %}
+
+        {% for project in projects_list %}
+            <li>
+                {{ project.title }}
+                {{ project.category }}
+                {{ project.created_at }}
+                {% if project.finished %} Ukończony {% else %} Nieukończony {% endif %}
+                {{ project.link }}
+                <a href="/projects/{{ project.id }}/change_status">Zmień status </a>
+                <a href="/projects/{{ project.id }}/delete"> <i class="fa-solid fa-trash"></i> </a>
+            </li>
+        {% endfor %}
+
+        {% endif %}
+
+    </div>
+</section>

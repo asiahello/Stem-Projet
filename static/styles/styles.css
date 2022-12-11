@@ -456,6 +456,31 @@ nav {
 	}
 }
 
+
+.projects-section form {
+	margin: 20px 0;
+}
+.add-button {
+	color: #ffffff;
+	background-color: #4f247c;
+	border: 3px solid #bf0034;
+	text-decoration: none;
+	padding: 10px 20px;
+	margin: 0 10px;
+	font-size: 20px;
+	text-transform: uppercase;
+}
+
+.add-button:hover {
+	color: #4f247c;
+	background-color: #ffffff;
+}
+
+.projects-section input {
+	padding: 10px 10px;
+}
+
+
 /* Footer */
 .footer {
 	padding: 40px 0;
