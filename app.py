@@ -8,12 +8,34 @@ from flask import (
     request,
     url_for,
 )
+
+from flask_login import (
+    current_user,
+    LoginManager,
+    login_user,
+    login_required,
+    logout_user,
+    UserMixin,
+)
 from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+# ten klucz powinien być przechowywany w zmiennych środowiskowych
+# ponieważ jest używany do szyfrowania session cookie
+# przykłady jak to zrobić są w filmikach na youtube dot. flaska
+# np: https://www.youtube.com/watch?v=dam0GPOAvVI
+app.config['SECRET_KEY'] = 'very secret key'
 db = SQLAlchemy(app)
+
+
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+ 
+@login_manager.user_loader
+def load_user(id):
+   return User.query.get(int(id))
 
 
 class Project(db.Model):
@@ -28,6 +50,15 @@ class Project(db.Model):
         return f'*Project {self.title}*'
 
 
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True)
+    # na potrzeby projektu trzymamy hasło w bazie danych w formie plain-textu
+    # nie powinno się tego robić w finalnych aplikacjach
+    # zobacz: https://www.youtube.com/watch?v=dam0GPOAvVI
+    password = db.Column(db.String(100), nullable=False)
+
+
 @app.route("/")
 def home():
     projects = Project.query.all()
@@ -35,6 +66,7 @@ def home():
 
     return render_template(
         "index.html",
+        user=current_user,
         projects_list=projects,
         weather_mood=weather_mood,
     )
@@ -83,6 +115,7 @@ def get_rain_info(rainfall):
 # żądanie wyświetl mi stronę z wszystkimi zadaniami - request HTTP GET /tasks
 # żądanie utwórz nowe zadanie - request HTTP POST /task + dane
 
+@login_required
 @app.route("/projects", methods=["POST"])
 def add_project():
     title = request.form.get("title")
@@ -102,6 +135,7 @@ def add_project():
     return redirect(url_for('home'))
     
 
+@login_required
 @app.route("/projects/<int:id>/delete")
 def delete_project(id):
     project_to_delete = Project.query.get_or_404(id)
@@ -112,6 +146,7 @@ def delete_project(id):
     return redirect(url_for('home'))
 
 
+@login_required
 @app.route("/projects/<int:id>/change_status")
 def change_status(id):
     project = Project.query.get_or_404(id)
@@ -119,3 +154,27 @@ def change_status(id):
 
     db.session.commit()
     return redirect(url_for('home'))
+
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+    else:  # POST
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        user = User.query.filter_by(username=username).first()
+        if user:
+            if user.password == password:
+                login_user(user, remember=True)
+                return redirect(url_for('home'))
+        else:
+            return render_template('login.html')
+
+
+@login_required 
+@app.route('/logout')
+def logout():
+   logout_user()
+   return redirect(url_for('home'))
